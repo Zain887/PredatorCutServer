@@ -2,12 +2,12 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class HeaderImage {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @Column()
-  url: string;
+    @Column()
+    url: string;
 
-  @Column()
-  article: string;
+    @Column()
+    article: string;
 }

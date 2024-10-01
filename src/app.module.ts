@@ -15,10 +15,15 @@ import { Product } from './product/entities/product.entity';
 import { Cart } from './cart/entities/cart.entity';
 import { CartItem } from './cart-item/entities/cart-item.entity';
 import { ProductComment } from './product-comment/entities/product-comment.entity';
-import { ProductTypes } from './product-type/entities/product-type.entity'; // Ensure the ProductTypes entity is defined
+import { ProductTypes } from './product-type/entities/product-type.entity'; // Ensure the ProductTypes entity is definedimport { ConfigModule } from '@nestjs/config';
+
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes the config globally available
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',           // PostgreSQL host
@@ -39,4 +44,4 @@ import { ProductTypes } from './product-type/entities/product-type.entity'; // E
     CartItemModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

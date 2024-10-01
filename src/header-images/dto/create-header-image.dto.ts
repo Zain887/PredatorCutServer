@@ -1,5 +1,11 @@
+import { IsString, IsNotEmpty } from 'class-validator';
+
 export class CreateHeaderImageDto {
-    id: string;
-    url: string;
-    article: string;
+    @IsString()
+    @IsNotEmpty()
+    url: string; // This will be set after the image is uploaded
+
+    @IsString()
+    @IsNotEmpty()
+    article: string; // The article associated with the header image
 }
