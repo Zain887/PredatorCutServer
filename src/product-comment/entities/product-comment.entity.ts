@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Product } from '../../product/entities/product.entity';
 
 @Entity()
 export class ProductComment {
@@ -8,9 +9,13 @@ export class ProductComment {
   @Column()
   user: string;
 
-  @Column()
+  @Column('text')
   comment: string;
 
-  @Column({ nullable: true })
-  rating: number;
+  @Column({ type: 'int', nullable: true })
+  rating?: number;
+
+  @ManyToOne(() => Product, (product) => product.comments)
+  @JoinColumn({ name: 'productId' }) // This specifies the foreign key column
+  product: Product;
 }

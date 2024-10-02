@@ -13,28 +13,37 @@ export class CategoryService {
   ) { }
 
   async findAllCategoriesWithDetails(): Promise<Category[]> {
-    return await this.categoryRepository.find({
+    const categories = await this.categoryRepository.find({
       relations: ['subcategories', 'subcategories.products', 'subcategories.products.comments'],
     });
+  
+    console.log('Categories fetched:', categories); // Log the data being returned
+    return categories;
   }
   
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  
+  // Updated create method
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    const newCategory = this.categoryRepository.create(createCategoryDto); // Create the category entity
+
+    // Save the category to the database
+    return await this.categoryRepository.save(newCategory);
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll(): Promise<Category[]> {
+    return this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string): Promise<Category> {
+    return this.categoryRepository.findOne({ where: {id} });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+    await this.categoryRepository.update(id, updateCategoryDto); // Update the category
+    return this.categoryRepository.findOne({ where: {id} }); // Return the updated category
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string): Promise<void> {
+    await this.categoryRepository.delete(id); // Remove the category
   }
 }

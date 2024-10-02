@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { ProductType } from '../../product-type/entities/product-type.entity';
 import { ProductComment } from '../../product-comment/entities/product-comment.entity';
 
 @Entity()
@@ -9,17 +10,26 @@ export class Product {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  shortDescription: string;
-
-  @Column('float')
+  @Column({ type: 'decimal' })
   price: number;
 
-  @Column('simple-array')
+  @Column('text', { array: true })
   imageUrl: string[];
 
+  @Column('text', { nullable: true })
+  shortDescription?: string;
+
+  @ManyToOne(() => ProductType, (productType) => productType.products)
+  @JoinColumn({ name: 'productTypeId' }) // This specifies the foreign key column
+  productType: ProductType;
+
+  @OneToMany(() => ProductComment, (comment) => comment.product, {
+    cascade: true,
+  })
+  comments?: ProductComment[];
+
   @Column('jsonb', { nullable: true })
-  productDetails: {
+  productDetails?: {
     description?: string;
     bladeLength?: string;
     bladeMaterial?: string;
@@ -28,12 +38,9 @@ export class Product {
     totalLength?: string;
   };
 
-  @Column()
+  @Column({ type: 'int' })
   quantity: number;
 
-  @Column('simple-array', { nullable: true })
-  tag: string[];
-
-  @OneToMany(() => ProductComment, (comment) => comment.id, { cascade: true })
-  comments: ProductComment[];
+  @Column('text', { array: true, nullable: true })
+  tag?: string[];
 }

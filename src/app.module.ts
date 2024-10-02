@@ -15,7 +15,7 @@ import { Product } from './product/entities/product.entity';
 import { Cart } from './cart/entities/cart.entity';
 import { CartItem } from './cart-item/entities/cart-item.entity';
 import { ProductComment } from './product-comment/entities/product-comment.entity';
-import { ProductTypes } from './product-type/entities/product-type.entity';
+import { ProductType } from './product-type/entities/product-type.entity';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -28,7 +28,7 @@ import { join } from 'path';
     TypeOrmModule.forRoot({
       url: process.env.DATABASE_URL,
       type: 'postgres',
-      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
+      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductType],
       synchronize: true,
       ssl: {
         rejectUnauthorized: false, // Allow self-signed certificate

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, OneToMany, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { CartItem } from '../../cart-item/entities/cart-item.entity';
 
 @Entity()
@@ -6,12 +6,12 @@ export class Cart {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.id, { cascade: true })
+  @OneToMany(() => CartItem, (item) => item.product, { cascade: true })
   items: CartItem[];
 
-  @Column()
+  @Column({ type: 'int' })
   totalQuantity: number;
 
-  @Column('float')
+  @Column({ type: 'decimal' })
   totalPrice: number;
 }

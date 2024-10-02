@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Product } from '../../product/entities/product.entity';
 
 @Entity()
@@ -6,21 +6,22 @@ export class CartItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Product, (product) => product.id)
-  productId: Product;
-
   @Column()
   name: string;
 
-  @Column('float')
+  @Column({ type: 'decimal' })
   price: number;
 
-  @Column()
+  @Column({ type: 'int' })
   quantity: number;
 
   @Column()
   imageUrl: string;
 
-  @Column('float')
+  @ManyToOne(() => Product)
+  @JoinColumn({ name: 'productId' }) // This specifies the foreign key column
+  product: Product;
+
+  @Column({ type: 'decimal' })
   total: number;
 }
