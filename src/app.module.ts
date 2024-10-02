@@ -25,16 +25,25 @@ import { ProductTypes } from './product-type/entities/product-type.entity';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT) || 5432,
-      username: process.env.DATABASE_USERNAME || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'predatorCut',
-      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
-      synchronize: process.env.NODE_ENV !== 'production', // Set to false in production
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get<string>('NODE_ENV') === 'production';
+
+        return {
+          type: 'postgres',
+          url: isProduction ? configService.get<string>('Postgres.DATABASE_URL') : null, // Use the new variable
+          host: isProduction ? undefined : configService.get<string>('DATABASE_HOST'),
+          port: isProduction ? undefined : configService.get<number>('DATABASE_PORT'),
+          username: isProduction ? undefined : configService.get<string>('DATABASE_USERNAME'),
+          password: isProduction ? undefined : configService.get<string>('DATABASE_PASSWORD'),
+          database: isProduction ? undefined : configService.get<string>('DATABASE_NAME'),
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+          entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
+          synchronize: true,
+        };
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
