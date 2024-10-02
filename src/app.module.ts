@@ -25,20 +25,16 @@ import { ProductTypes } from './product-type/entities/product-type.entity';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DATABASE_HOST'),
-        port: parseInt(configService.get('DATABASE_PORT'), 10),
-        username: configService.get('DATABASE_USERNAME'),
-        password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'),
-        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false, // Add SSL for production/live
-        entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
-        synchronize: true,
-      }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT) || 5432,
+      username: process.env.DATABASE_USERNAME || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'postgres',
+      database: process.env.DATABASE_NAME || 'predatorCut',
+      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
+      synchronize: process.env.NODE_ENV !== 'production', // Set to false in production
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
@@ -53,4 +49,4 @@ import { ProductTypes } from './product-type/entities/product-type.entity';
     CartItemModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
