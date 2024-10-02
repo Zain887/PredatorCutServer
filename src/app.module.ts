@@ -17,6 +17,8 @@ import { CartItem } from './cart-item/entities/cart-item.entity';
 import { ProductComment } from './product-comment/entities/product-comment.entity';
 import { ProductTypes } from './product-type/entities/product-type.entity';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -33,6 +35,10 @@ import { ConfigModule } from '@nestjs/config';
       entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes], // Include all entities
       synchronize: true,                           // Synchronize schema in development
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', process.env.UPLOADS_DIR || 'uploads'),
+      serveRoot: '/uploads',
+    }),
     // Register your feature modules here
     HeaderImagesModule,
     CategoryModule,
@@ -43,4 +49,4 @@ import { ConfigModule } from '@nestjs/config';
     CartItemModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
