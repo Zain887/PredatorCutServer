@@ -30,6 +30,7 @@ import { join } from 'path';
       type: 'postgres',
       entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductType],
       synchronize: true,
+      logging: ['query', 'error'],
       ssl: {
         rejectUnauthorized: false, // Allow self-signed certificate
       },

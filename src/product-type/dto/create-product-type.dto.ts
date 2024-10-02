@@ -1,6 +1,11 @@
-import { Product } from "src/product/entities/product.entity";
+import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
+
 export class CreateProductTypeDto {
-    id: string;
-    name: string;
-    products: Product[];
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsUUID()
+  categoryId: string;
+
 }
