@@ -31,12 +31,14 @@ import { ProductTypes } from './product-type/entities/product-type.entity';
       useFactory: (configService: ConfigService) => {
         const isProduction = configService.get<string>('NODE_ENV') === 'production';
 
+        const dbUrl = isProduction
+          ? `postgresql://${configService.get<string>('PGUSER')}:${configService.get<string>('POSTGRES_PASSWORD')}@${configService.get<string>('RAILWAY_TCP_PROXY_DOMAIN')}:${configService.get<string>('RAILWAY_TCP_PROXY_PORT')}/${configService.get<string>('POSTGRES_DB')}`
+          : `postgresql://${configService.get<string>('DATABASE_USERNAME')}:${configService.get<string>('DATABASE_PASSWORD')}@${configService.get<string>('DATABASE_HOST')}:${configService.get<number>('DATABASE_PORT')}/${configService.get<string>('DATABASE_NAME')}`;
+
+        console.log("Connecting to database with URL: ", dbUrl); // Log the connection URL
         return {
           type: 'postgres',
-          url: isProduction
-            ? `postgresql://${configService.get<string>('PGUSER')}:${configService.get<string>('POSTGRES_PASSWORD')}@${configService.get<string>('RAILWAY_TCP_PROXY_DOMAIN')}:${configService.get<string>('RAILWAY_TCP_PROXY_PORT')}/${configService.get<string>('POSTGRES_DB')}`
-            : `postgresql://${configService.get<string>('DATABASE_USERNAME')}:${configService.get<string>('DATABASE_PASSWORD')}@${configService.get<string>('DATABASE_HOST')}:${configService.get<number>('DATABASE_PORT')}/${configService.get<string>('DATABASE_NAME')}`,
-          synchronize: true,
+          url: dbUrl, synchronize: true,
           entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
         };
       },
