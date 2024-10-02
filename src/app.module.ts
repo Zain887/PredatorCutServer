@@ -26,14 +26,13 @@ import { join } from 'path';
       isGlobal: true, // Makes the config globally available
     }),
     TypeOrmModule.forRoot({
+      url: process.env.DATABASE_URL,
       type: 'postgres',
-      host: process.env.DATABASE_HOST,           // Use environment variable
-      port: +process.env.DATABASE_PORT,           // Convert string to number
-      username: process.env.DATABASE_USERNAME,    // Use environment variable
-      password: process.env.DATABASE_PASSWORD,    // Use environment variable
-      database: process.env.DATABASE_NAME,        // Use environment variable
-      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes], // Include all entities
-      synchronize: true,                           // Synchronize schema in development
+      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, ProductTypes],
+      synchronize: true,
+      ssl: {
+        rejectUnauthorized: false, // Allow self-signed certificate
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', process.env.UPLOADS_DIR || 'uploads'),
