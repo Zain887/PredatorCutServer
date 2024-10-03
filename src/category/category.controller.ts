@@ -13,6 +13,11 @@ export class CategoryController {
     return await this.categoryService.findAllCategoriesWithDetails();
   }
 
+  @Get(':categoryId/subcategories')
+  async getSubcategories(@Param('categoryId') categoryId: string) {
+    return this.categoryService.getSubcategoriesByCategory(categoryId);
+  }
+
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);

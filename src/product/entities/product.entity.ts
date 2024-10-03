@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { ProductType } from '../../product-type/entities/product-type.entity';
 import { ProductComment } from '../../product-comment/entities/product-comment.entity';
+import { Subcategory } from 'src/subcategory/entities/subcategory.entity';
 
 @Entity()
 export class Product {
@@ -19,9 +19,12 @@ export class Product {
   @Column('text', { nullable: true })
   shortDescription?: string;
 
-  @ManyToOne(() => ProductType, (productType) => productType.products)
-  @JoinColumn({ name: 'productTypeId' }) // This specifies the foreign key column
-  productType: ProductType;
+  @ManyToOne(() => Subcategory, { nullable: true })
+  @JoinColumn({ name: 'subcategoryId' })
+  subcategory: Subcategory; // This links the subcategoryId as a foreign key
+
+  @Column({ nullable: true })
+  subcategoryId: string; // This is required for storing the actual subcategoryId
 
   @OneToMany(() => ProductComment, (comment) => comment.product, {
     cascade: true,

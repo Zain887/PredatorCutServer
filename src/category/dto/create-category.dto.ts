@@ -1,6 +1,6 @@
 // dto/create-category.dto.ts
 import { IsString, IsArray, ArrayNotEmpty } from 'class-validator';
-import { ProductType } from '../../product-type/entities/product-type.entity'; // Make sure you have a type defined for subcategories
+import { Subcategory } from 'src/subcategory/entities/subcategory.entity';
 
 export class CreateCategoryDto {
   @IsString()
@@ -8,5 +8,5 @@ export class CreateCategoryDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  subcategories: ProductType[];
+  subcategories: Subcategory[];
 }

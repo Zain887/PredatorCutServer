@@ -17,4 +17,6 @@ export class CreateProductDto {
     quantity: number;
     tag?: string[];
     comments?: ProductComment[];
+    subcategoryId: string;
+    categoryId: string;
 }

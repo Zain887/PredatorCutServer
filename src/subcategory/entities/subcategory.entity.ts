@@ -3,7 +3,7 @@ import { Product } from '../../product/entities/product.entity';
 import { Category } from '../../category/entities/category.entity';
 
 @Entity()
-export class ProductType {
+export class Subcategory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -14,6 +14,6 @@ export class ProductType {
   @JoinColumn({ name: 'categoryId' }) // This specifies the foreign key column
   category: Category;
 
-  @OneToMany(() => Product, (product) => product.productType)
+  @OneToMany(() => Product, (product) => product.subcategory)
   products: Product[];
 }

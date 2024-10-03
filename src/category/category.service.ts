@@ -16,12 +16,23 @@ export class CategoryService {
     const categories = await this.categoryRepository.find({
       relations: ['subcategories', 'subcategories.products', 'subcategories.products.comments'],
     });
-  
+
     console.log('Categories fetched:', categories); // Log the data being returned
     return categories;
   }
-  
-  
+
+  // Method to fetch subcategories by category ID
+  async getSubcategoriesByCategory(categoryId: string) {
+    // This is assuming you're fetching from a database
+    const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['subcategories'] });
+
+    if (!category) {
+      throw new Error('Category not found');
+    }
+
+    return category.subcategories; // Return the related subcategories
+  }
+
   // Updated create method
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     const newCategory = this.categoryRepository.create(createCategoryDto); // Create the category entity
@@ -35,12 +46,12 @@ export class CategoryService {
   }
 
   async findOne(id: string): Promise<Category> {
-    return this.categoryRepository.findOne({ where: {id} });
+    return this.categoryRepository.findOne({ where: { id } });
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     await this.categoryRepository.update(id, updateCategoryDto); // Update the category
-    return this.categoryRepository.findOne({ where: {id} }); // Return the updated category
+    return this.categoryRepository.findOne({ where: { id } }); // Return the updated category
   }
 
   async remove(id: string): Promise<void> {
