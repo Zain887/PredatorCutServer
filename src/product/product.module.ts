@@ -8,8 +8,9 @@ import { Subcategory } from 'src/subcategory/entities/subcategory.entity';
 import { SubcategoryModule } from 'src/subcategory/subcategory.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Product, Category, Subcategory]),SubcategoryModule],
+  imports: [TypeOrmModule.forFeature([Product, Category, Subcategory]), SubcategoryModule],
   controllers: [ProductController],
   providers: [ProductService],
+  exports: [TypeOrmModule.forFeature([ProductModule])],
 })
-export class ProductModule {}
+export class ProductModule { }

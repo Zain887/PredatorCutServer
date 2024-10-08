@@ -7,9 +7,12 @@ import { UpdateProductCommentDto } from './dto/update-product-comment.dto';
 export class ProductCommentController {
   constructor(private readonly productCommentService: ProductCommentService) {}
 
-  @Post()
-  create(@Body() createProductCommentDto: CreateProductCommentDto) {
-    return this.productCommentService.create(createProductCommentDto);
+  @Post(':productId')
+  async createComment(
+    @Param('productId') productId: string,
+    @Body() createProductCommentDto: CreateProductCommentDto,
+  ) {
+    return this.productCommentService.createComment(productId, createProductCommentDto);
   }
 
   @Get()
@@ -19,16 +22,16 @@ export class ProductCommentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productCommentService.findOne(+id);
+    return this.productCommentService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductCommentDto: UpdateProductCommentDto) {
-    return this.productCommentService.update(+id, updateProductCommentDto);
+    return this.productCommentService.update(id, updateProductCommentDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productCommentService.remove(+id);
+    return this.productCommentService.remove(id);
   }
 }

@@ -3,4 +3,6 @@ export class CreateProductCommentDto {
     user: string;
     comment: string;
     rating?: number;
+    productId: string;
+    
 }

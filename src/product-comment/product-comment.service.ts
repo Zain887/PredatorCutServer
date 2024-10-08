@@ -1,26 +1,74 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductCommentDto } from './dto/create-product-comment.dto';
 import { UpdateProductCommentDto } from './dto/update-product-comment.dto';
+import { ProductComment } from './entities/product-comment.entity';
+import { Repository } from 'typeorm';
+import { Product } from 'src/product/entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProductCommentService {
-  create(createProductCommentDto: CreateProductCommentDto) {
-    return 'This action adds a new productComment';
+  constructor(
+    @InjectRepository(ProductComment)
+    private readonly productCommentRepository: Repository<ProductComment>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) { }
+
+  async createComment(productId: string, createProductCommentDto: CreateProductCommentDto): Promise<ProductComment> {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    // Create a new comment and link the product via the product object
+    const comment = this.productCommentRepository.create({
+      ...createProductCommentDto,
+      product: product, // Use the product object, not just productId
+    });
+
+    return this.productCommentRepository.save(comment);
   }
 
-  findAll() {
-    return `This action returns all productComment`;
+  async findAll(): Promise<ProductComment[]> {
+    return this.productCommentRepository.find({ relations: ['product'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productComment`;
+
+  async findOne(id: string): Promise<ProductComment> {
+    const comment = await this.productCommentRepository.findOne({ where: { id }, relations: ['product'] });
+
+    if (!comment) {
+      throw new Error(`Product comment with ID ${id} not found`);
+    }
+
+    return comment;
   }
 
-  update(id: number, updateProductCommentDto: UpdateProductCommentDto) {
-    return `This action updates a #${id} productComment`;
+
+  async update(id: string, updateProductCommentDto: UpdateProductCommentDto): Promise<ProductComment> {
+    const comment = await this.productCommentRepository.findOne({ where: { id } });
+
+    if (!comment) {
+      throw new Error(`Product comment with ID ${id} not found`);
+    }
+
+    // Update the comment fields
+    Object.assign(comment, updateProductCommentDto);
+
+    return this.productCommentRepository.save(comment);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productComment`;
+
+  async remove(id: string): Promise<void> {
+    const comment = await this.productCommentRepository.findOne({ where: { id } });
+
+    if (!comment) {
+      throw new Error(`Product comment with ID ${id} not found`);
+    }
+
+    await this.productCommentRepository.remove(comment);
   }
+
 }

@@ -15,7 +15,8 @@ export class ProductComment {
   @Column({ type: 'int', nullable: true })
   rating?: number;
 
+  // Relationship to the Product entity
   @ManyToOne(() => Product, (product) => product.comments)
-  @JoinColumn({ name: 'productId' }) // This specifies the foreign key column
-  product: Product;
+  @JoinColumn({ name: 'productId' }) // Links the foreign key column for productId
+  product: Product; // You reference the whole Product object, not just the productId
 }
