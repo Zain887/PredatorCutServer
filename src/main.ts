@@ -23,19 +23,19 @@ async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
   const allowedOrigins = isProduction
     ? [process.env.FRONTEND_URL] // Use environment variable for production frontend URL
-    : '*'; // Allow all origins in development
+    : ['http://localhost:3000']; // Set localhost for development
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: allowedOrigins, // Accept the correct frontend URLs
     methods: 'GET,POST,PUT,DELETE,OPTIONS',
     credentials: true,
   });
 
-  // Set the port dynamically based on environment variables
+  // Set the port dynamically based on environment variables (Railway sets this automatically in production)
   const port = process.env.PORT || 3000;
 
   await app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${port}`);
   });
 }
 bootstrap();
