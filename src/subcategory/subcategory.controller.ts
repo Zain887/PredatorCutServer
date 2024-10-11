@@ -17,6 +17,12 @@ export class SubcategoryController {
     return this.subcategoryService.findAll();
   }
 
+  // Fetch subcategories by categoryId
+  @Get('/category/:categoryId')
+  findByCategoryId(@Param('categoryId') categoryId: string) {
+    return this.subcategoryService.findByCategoryId(categoryId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.subcategoryService.findOne(id);

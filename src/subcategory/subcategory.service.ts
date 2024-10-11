@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
 import { UpdateSubcategoryDto } from './dto/update-subcategory.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,42 +17,73 @@ export class SubcategoryService {
     private categoryRepository: Repository<Category>,
   ) { }
 
+  // Create a new subcategory
   async create(createSubcategoryDto: CreateSubcategoryDto): Promise<Subcategory> {
     const { name, categoryId } = createSubcategoryDto;
+
+    // Find the associated category
+    const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    // Check if a subcategory with the same name exists under the same category
+    const existingSubcategory = await this.subCategoryRepository.findOne({
+      where: { name, category: { id: categoryId } }, // Correct reference to category in the query
+    });
+
+    if (existingSubcategory) {
+      throw new ConflictException('Subcategory with this name already exists in this category');
+    }
+
+    // Create the new subcategory
+    const newSubcategory = this.subCategoryRepository.create({ name, category });
+    return await this.subCategoryRepository.save(newSubcategory);
+  }
+
+  // Method to find subcategories by categoryId
+  async findByCategoryId(categoryId: string): Promise<Subcategory[]> {
     const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
 
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundException(`Category with id ${categoryId} not found`);
     }
 
-    // Check if the ProductType with the same name and categoryId already exists
-    const existingProductType = await this.subCategoryRepository.findOne({
-      where: { name, category: { id: categoryId } },
-    });
-
-    if (existingProductType) {
-      throw new Error('Product Type with this name already exists in this category');
-    }
-
-    const newProductType = this.subCategoryRepository.create({ name, category });
-    console.log('Saving new ProductType:', newProductType); // Log the entity to confirm
-    return await this.subCategoryRepository.save(newProductType);
+    return this.subCategoryRepository.find({ where: { category: { id: categoryId } } });
   }
-
+  
+  // Retrieve all subcategories
   async findAll(): Promise<Subcategory[]> {
-    return this.subCategoryRepository.find(); // Returns all product types
+    return this.subCategoryRepository.find({ relations: ['category'] }); // Include category relation if needed
   }
 
+  // Retrieve a single subcategory by id
   async findOne(id: string): Promise<Subcategory> {
-    return this.subCategoryRepository.findOne({ where: { id } }); // Returns a product type by id
+    const subcategory = await this.subCategoryRepository.findOne({ where: { id } });
+    if (!subcategory) {
+      throw new NotFoundException(`Subcategory with id ${id} not found`);
+    }
+    return subcategory;
   }
 
+  // Update a subcategory
   async update(id: string, updateSubcategoryDto: UpdateSubcategoryDto): Promise<Subcategory> {
+    const existingSubcategory = await this.subCategoryRepository.findOne({ where: { id } });
+    if (!existingSubcategory) {
+      throw new NotFoundException(`Subcategory with id ${id} not found`);
+    }
+
     await this.subCategoryRepository.update(id, updateSubcategoryDto);
-    return this.subCategoryRepository.findOne({ where: { id } }); // Updates the product type
+    return this.subCategoryRepository.findOne({ where: { id } });
   }
 
+  // Remove a subcategory
   async remove(id: string): Promise<void> {
-    await this.subCategoryRepository.delete(id); // Removes a product type by id
+    const subcategory = await this.subCategoryRepository.findOne({ where: { id } });
+    if (!subcategory) {
+      throw new NotFoundException(`Subcategory with id ${id} not found`);
+    }
+
+    await this.subCategoryRepository.delete(id);
   }
 }
