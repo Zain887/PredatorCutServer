@@ -14,7 +14,7 @@ import { CreateHeaderImageDto } from './dto/create-header-image.dto';
 import { UpdateHeaderImageDto } from './dto/update-header-image.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('header-images')
+@Controller('/header-images')
 export class HeaderImagesController {
   constructor(private readonly headerImagesService: HeaderImagesService) { }
 

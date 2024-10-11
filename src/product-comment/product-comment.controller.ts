@@ -3,7 +3,7 @@ import { ProductCommentService } from './product-comment.service';
 import { CreateProductCommentDto } from './dto/create-product-comment.dto';
 import { UpdateProductCommentDto } from './dto/update-product-comment.dto';
 
-@Controller('product-comment')
+@Controller('/product-comment')
 export class ProductCommentController {
   constructor(private readonly productCommentService: ProductCommentService) {}
 
