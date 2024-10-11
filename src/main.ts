@@ -8,6 +8,7 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
     .setDescription('The API description')
@@ -24,12 +25,13 @@ async function bootstrap() {
     : '*'; // Allow all in development
 
   app.enableCors({
-    origin: allowedOrigins, // Allow your frontend domain
+    origin: allowedOrigins,
     methods: 'GET,POST,PUT,DELETE,OPTIONS',
     credentials: true,
   });
 
-  const port = process.env.PORT || 3000;
+  // Use the environment variable PORT, which Railway assigns automatically
+  const port = process.env.PORT || 3000; // Use 3000 for local dev, PORT for Railway
   await app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
