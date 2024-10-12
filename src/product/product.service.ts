@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { Category } from '../category/entities/category.entity';
-import { Subcategory } from '../subcategory/entities/subcategory.entity'; // Ensure you import the Subcategory entity
+import { Subcategory } from '../subcategory/entities/subcategory.entity';
 
 @Injectable()
 export class ProductService {
@@ -16,30 +16,28 @@ export class ProductService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
 
-    @InjectRepository(Subcategory) // Ensure SubcategoryRepository is injected
+    @InjectRepository(Subcategory)
     private subcategoryRepository: Repository<Subcategory>,
-  ) { }
+  ) {}
 
-
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto): Promise<Product> {
     const { subcategoryId, categoryId } = createProductDto;
 
     // Check if the category exists
     const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundException('Category not found');
     }
 
     // Check if the subcategory exists under the selected category
-    // In your ProductService
     const subcategory = await this.subcategoryRepository.findOne({
-      where: { id: subcategoryId, category: { id: categoryId } },  // Use category as a nested object
+      where: { id: subcategoryId, category: { id: categoryId } },
     });
     if (!subcategory) {
-      throw new Error('Subcategory not found');
+      throw new NotFoundException('Subcategory not found');
     }
 
-    // Create the product (Assuming the rest of the create logic follows)
+    // Create the product
     const product = this.productRepository.create(createProductDto);
     await this.productRepository.save(product);
     return product;
@@ -50,15 +48,23 @@ export class ProductService {
   }
 
   async findOne(id: string): Promise<Product> {
-    return await this.productRepository.findOneBy({ id });
+    const product = await this.productRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    return product;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
     await this.productRepository.update(id, updateProductDto);
-    return this.findOne(id);  // Return the updated product
+    const updatedProduct = await this.findOne(id);
+    return updatedProduct;  // Return the updated product
   }
 
   async remove(id: string): Promise<void> {
-    await this.productRepository.delete(id);  // Delete the product
+    const result = await this.productRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Product not found');  // Throw an exception if no product was deleted
+    }
   }
 }

@@ -13,7 +13,7 @@ export class ProductCommentService {
     private readonly productCommentRepository: Repository<ProductComment>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   async createComment(productId: string, createProductCommentDto: CreateProductCommentDto): Promise<ProductComment> {
     const product = await this.productRepository.findOne({ where: { id: productId } });
@@ -35,6 +35,12 @@ export class ProductCommentService {
     return this.productCommentRepository.find({ relations: ['product'] });
   }
 
+  async findCommentsByProductId(productId: string): Promise<ProductComment[]> {
+    return this.productCommentRepository.find({
+      where: { product: { id: productId } }, // Adjust to use the product relation
+      relations: ['product'], // Include product relation if needed
+    });
+  }
 
   async findOne(id: string): Promise<ProductComment> {
     const comment = await this.productCommentRepository.findOne({ where: { id }, relations: ['product'] });
@@ -45,7 +51,6 @@ export class ProductCommentService {
 
     return comment;
   }
-
 
   async update(id: string, updateProductCommentDto: UpdateProductCommentDto): Promise<ProductComment> {
     const comment = await this.productCommentRepository.findOne({ where: { id } });
@@ -60,7 +65,6 @@ export class ProductCommentService {
     return this.productCommentRepository.save(comment);
   }
 
-
   async remove(id: string): Promise<void> {
     const comment = await this.productCommentRepository.findOne({ where: { id } });
 
@@ -70,5 +74,4 @@ export class ProductCommentService {
 
     await this.productCommentRepository.remove(comment);
   }
-
 }

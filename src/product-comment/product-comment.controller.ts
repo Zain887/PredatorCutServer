@@ -15,6 +15,11 @@ export class ProductCommentController {
     return this.productCommentService.createComment(productId, createProductCommentDto);
   }
 
+  @Get(':productId') // Change this to get comments for a specific product
+  async findCommentsByProductId(@Param('productId') productId: string) {
+    return this.productCommentService.findCommentsByProductId(productId);
+  }
+
   @Get()
   findAll() {
     return this.productCommentService.findAll();
