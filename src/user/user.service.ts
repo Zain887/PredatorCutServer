@@ -34,4 +34,9 @@ export class UserService {
   async findOneByUsername(username: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { username } }); // Use the repository to find a user by username
   }
+
+   // Method to find a user by ID
+   async findById(id: string): Promise<User | null> {
+    return this.userRepository.findOne({where:{id}});
+  }
 }

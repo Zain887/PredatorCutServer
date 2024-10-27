@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, NotFoundException, Patch, BadRequestException } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { ProductService } from '../product/product.service';
-import { AuthenticatedRequest } from '../types/authenticated-request';
+import { AuthenticatedRequest } from '../types/express-request.interface';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { Product } from '../product/entities/product.entity';
 
@@ -10,7 +10,7 @@ export class CartController {
   constructor(
     private readonly cartService: CartService,
     private readonly productService: ProductService,
-  ) { }
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -26,8 +26,9 @@ export class CartController {
     @Param('productId') productId: string,
     @Body('quantity') quantity: number,
   ) {
-    const userId = req.user.id;
+    if (quantity <= 0) throw new BadRequestException('Quantity must be a positive number');
 
+    const userId = req.user.id;
     const product: Product | undefined = await this.productService.findOne(productId);
 
     if (!product) {
@@ -39,13 +40,11 @@ export class CartController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('remove/:productId')
-  async removeItemFromCart(
-    @Req() req: AuthenticatedRequest,
-    @Param('productId') productId: string
-  ) {
+  async removeItemFromCart(@Req() req: AuthenticatedRequest, @Param('productId') productId: string) {
     const userId = req.user.id;
-    return this.cartService.removeItemFromCart(userId, productId);
-  }
+    const updatedCart = await this.cartService.removeItemFromCart(userId, productId);
+    return { message: 'Item removed successfully', items: updatedCart };
+  }  
 
   @UseGuards(JwtAuthGuard)
   @Patch('update-quantity/:productId')
@@ -54,14 +53,15 @@ export class CartController {
     @Param('productId') productId: string,
     @Body('quantity') quantity: number,
   ) {
+    if (quantity <= 0) throw new BadRequestException('Quantity must be a positive number');
+
     const userId = req.user.id;
-  
-    // Check if the product exists in the user's cart
     const cartItem = await this.cartService.findCartItem(userId, productId);
+
     if (!cartItem) {
       throw new NotFoundException(`Product with ID ${productId} not found in cart`);
     }
-  
+
     return this.cartService.updateItemQuantity(userId, productId, quantity);
-  }  
+  }
 }
