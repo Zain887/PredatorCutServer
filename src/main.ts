@@ -17,7 +17,7 @@ async function bootstrap() {
 
   // CORS configuration
   app.enableCors({
-    origin: 'http://localhost:5173',  // Set your frontend origin here
+    origin: ['http://localhost:5173', 'https://predatorcut.pages.dev'],  // Allow both localhost and production origin
     credentials: true,  // Allow credentials (cookies, etc.)
   });
 
