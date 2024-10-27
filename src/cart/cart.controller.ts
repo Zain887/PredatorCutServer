@@ -1,34 +1,67 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, NotFoundException, Patch } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { ProductService } from '../product/product.service';
+import { AuthenticatedRequest } from '../types/authenticated-request';
+import { JwtAuthGuard } from '../jwt-auth.guard';
+import { Product } from '../product/entities/product.entity';
 
-@Controller('/cart')
+@Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(
+    private readonly cartService: CartService,
+    private readonly productService: ProductService,
+  ) { }
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  async getUserCart(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
+    return this.cartService.getUserCart(userId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  @Post('add/:productId')
+  async addItemToCart(
+    @Req() req: AuthenticatedRequest,
+    @Param('productId') productId: string,
+    @Body('quantity') quantity: number,
+  ) {
+    const userId = req.user.id;
+
+    const product: Product | undefined = await this.productService.findOne(productId);
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    return this.cartService.addItemToCart(userId, product, quantity);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  @UseGuards(JwtAuthGuard)
+  @Delete('remove/:productId')
+  async removeItemFromCart(
+    @Req() req: AuthenticatedRequest,
+    @Param('productId') productId: string
+  ) {
+    const userId = req.user.id;
+    return this.cartService.removeItemFromCart(userId, productId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
-  }
+  @UseGuards(JwtAuthGuard)
+  @Patch('update-quantity/:productId')
+  async updateItemQuantity(
+    @Req() req: AuthenticatedRequest,
+    @Param('productId') productId: string,
+    @Body('quantity') quantity: number,
+  ) {
+    const userId = req.user.id;
+  
+    // Check if the product exists in the user's cart
+    const cartItem = await this.cartService.findCartItem(userId, productId);
+    if (!cartItem) {
+      throw new NotFoundException(`Product with ID ${productId} not found in cart`);
+    }
+  
+    return this.cartService.updateItemQuantity(userId, productId, quantity);
+  }  
 }

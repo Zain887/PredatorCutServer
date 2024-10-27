@@ -19,6 +19,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SubcategoryModule } from './subcategory/subcategory.module';
 import { Subcategory } from './subcategory/entities/subcategory.entity';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { AuthModule } from './AuthModule.module';
 
 @Module({
   imports: [
@@ -28,7 +31,7 @@ import { Subcategory } from './subcategory/entities/subcategory.entity';
     TypeOrmModule.forRoot({
       url: process.env.DATABASE_URL,
       type: 'postgres',
-      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, Subcategory],
+      entities: [HeaderImage, Category, Product, Cart, CartItem, ProductComment, Subcategory, User],
       synchronize: true,
       logging: ['query', 'error'],
       ssl: {
@@ -48,6 +51,8 @@ import { Subcategory } from './subcategory/entities/subcategory.entity';
     SubcategoryModule,
     CartItemModule,
     SubcategoryModule,
+    UserModule,
+    AuthModule,
   ],
 })
 export class AppModule { }
