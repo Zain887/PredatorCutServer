@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { HeaderImagesService } from './header-images.service';
 import { CreateHeaderImageDto } from './dto/create-header-image.dto';
@@ -24,6 +25,10 @@ export class HeaderImagesController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createHeaderImageDto: CreateHeaderImageDto
   ) {
+    if (!file) {
+      throw new BadRequestException('File is required'); // Handle missing file
+    }
+
     const url = await this.headerImagesService.saveFile(file); // Save the file and get the URL
     createHeaderImageDto.url = url; // Set the URL in the DTO
 
@@ -41,9 +46,19 @@ export class HeaderImagesController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateHeaderImageDto: UpdateHeaderImageDto) {
-    return await this.headerImagesService.update(id, updateHeaderImageDto); // Update a header image
+  @UseInterceptors(FileInterceptor('file')) // Add interceptor for file upload
+  async update(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File, // Capture file if provided
+    @Body() updateHeaderImageDto: UpdateHeaderImageDto
+  ) {
+    if (file) {
+      const url = await this.headerImagesService.saveFile(file); // Save the new file
+      updateHeaderImageDto.url = url; // Update DTO with new file URL
+    }
+    return await this.headerImagesService.update(id, updateHeaderImageDto); // Update header image
   }
+
 
   @Delete(':id')
   async remove(@Param('id') id: string) {

@@ -69,13 +69,29 @@ export class SubcategoryService {
   // Update a subcategory
   async update(id: string, updateSubcategoryDto: UpdateSubcategoryDto): Promise<Subcategory> {
     const existingSubcategory = await this.subCategoryRepository.findOne({ where: { id } });
+    
     if (!existingSubcategory) {
       throw new NotFoundException(`Subcategory with id ${id} not found`);
     }
-
-    await this.subCategoryRepository.update(id, updateSubcategoryDto);
-    return this.subCategoryRepository.findOne({ where: { id } });
+  
+    // If categoryId is provided, ensure it exists
+    if (updateSubcategoryDto.categoryId) {
+      const category = await this.categoryRepository.findOne({ where: { id: updateSubcategoryDto.categoryId } });
+      
+      if (!category) {
+        throw new NotFoundException(`Category with id ${updateSubcategoryDto.categoryId} not found`);
+      }
+  
+      existingSubcategory.category = category; // Update the category
+    }
+  
+    // Update the subcategory fields
+    Object.assign(existingSubcategory, updateSubcategoryDto);
+    
+    await this.subCategoryRepository.save(existingSubcategory); // Save the updated subcategory
+    return existingSubcategory;
   }
+  
 
   // Remove a subcategory
   async remove(id: string): Promise<void> {

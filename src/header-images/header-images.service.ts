@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateHeaderImageDto } from './dto/create-header-image.dto';
 import { UpdateHeaderImageDto } from './dto/update-header-image.dto';
 import * as fs from 'fs';
@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HeaderImage } from './entities/header-image.entity';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class HeaderImagesService {
@@ -18,7 +19,8 @@ export class HeaderImagesService {
 
   async saveFile(file: Express.Multer.File): Promise<string> {
     const uploadsDir = this.configService.get<string>('UPLOADS_DIR') || 'uploads'; // Get uploads directory from config
-    const uploadPath = path.join(__dirname, '..', '..', uploadsDir, file.originalname); // Adjust path to include uploads directory
+    const safeFileName = `${crypto.randomBytes(16).toString('hex')}-${file.originalname}`; // Generate a safe file name
+    const uploadPath = path.join(__dirname, '..', '..', uploadsDir, safeFileName); // Adjust path to include uploads directory
 
     console.log('Upload path:', uploadPath); // Log the upload path for debugging
 
@@ -28,7 +30,7 @@ export class HeaderImagesService {
     }
 
     fs.writeFileSync(uploadPath, file.buffer); // Save the file
-    return `/${uploadsDir}/${file.originalname}`; // Return the URL path
+    return `/${uploadsDir}/${safeFileName}`; // Return the URL path
   }
 
   async create(createHeaderImageDto: CreateHeaderImageDto): Promise<HeaderImage> {
@@ -37,7 +39,7 @@ export class HeaderImagesService {
       return await this.headerImageRepository.save(headerImage);
     } catch (error) {
       console.error('Error creating header image:', error);
-      throw new Error('Could not create header image');
+      throw new BadRequestException('Could not create header image'); // Use proper exception handling
     }
   }
 
@@ -46,13 +48,24 @@ export class HeaderImagesService {
   }
 
   async findOne(id: string): Promise<HeaderImage> {
-    return await this.headerImageRepository.findOne({ where: { id }}); // Fetch one header image by ID (UUID)
+    const headerImage = await this.headerImageRepository.findOne({ where: { id }}); // Fetch one header image by ID (UUID)
+    if (!headerImage) {
+      throw new NotFoundException('Header image not found'); // Handle not found error
+    }
+    return headerImage;
   }
 
   async update(id: string, updateHeaderImageDto: UpdateHeaderImageDto): Promise<HeaderImage> {
-    await this.headerImageRepository.update(id, updateHeaderImageDto); // Update the header image
-    return this.findOne(id); // Return the updated header image
-  }
+    const headerImage = await this.findOne(id); // Retrieve existing header image
+    if (updateHeaderImageDto.url) {
+        headerImage.url = updateHeaderImageDto.url; // Set new URL if provided
+    }
+    headerImage.article = updateHeaderImageDto.article; // Update article text
+    return await this.headerImageRepository.save(headerImage); // Save updated record
+}
+
+
+  
 
   async remove(id: string): Promise<void> {
     await this.headerImageRepository.delete(id); // Remove the header image by ID
